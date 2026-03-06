@@ -9,7 +9,7 @@ export type VerificationStatus =
 
 export interface VerificationResult {
   status: VerificationStatus;
-  /** True when UID was already in storage – VIP link must not be sent again. */
+  /** True when UID was already in storage – Elite Group link must not be sent again. */
   alreadyVerified?: boolean;
 }
 

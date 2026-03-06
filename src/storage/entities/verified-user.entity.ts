@@ -11,7 +11,7 @@ export class VerifiedUser {
   @PrimaryGeneratedColumn()
   id: number;
 
-  /** Bybit UID – unique so we don't store or send VIP link twice. */
+  /** Bybit UID – unique so we don't store or send Elite Group link twice. */
   @Column({ type: 'varchar', length: 32, unique: true })
   @Index('IDX_verified_users_uid', { unique: true })
   uid: string;

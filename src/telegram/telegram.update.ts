@@ -35,10 +35,10 @@ export class TelegramUpdate {
     try {
       const howToJoin =
         'How to join:\n\n' +
-        '1. Sign up on Bybit to start trading.\n' +
-        '2. Deposit $100 into your Bybit account.\n' +
-        '3. Enter your unique Bybit UID.\n' +
-        '4. Receive an invite link to join the VIP group.';
+        '1. Sign up on Bybit to start trading.\n\n' +
+        '2. Deposit $100 into your Bybit account.\n\n' +
+        '3. Enter your unique Bybit UID.\n\n' +
+        '4. Receive an invite link to join the Elite group.';
 
       await ctx.reply(
         howToJoin,
@@ -86,9 +86,9 @@ export class TelegramUpdate {
   private async sendSignUpBonus(ctx: Context) {
     const link = this.getAffiliateLink();
     const text =
-      'Sign up with our referral link to get your bonus and join the community:\n\n' +
+      'Sign up with my affiliate link to claim up to $5000 bonuses:\n\n' +
       (link ? `${link}\n\n` : '') +
-      'Your account must have net assets of at least $100 to qualify for the VIP group.';
+      'Make sure you have up to $100 on your Bybit account after signing up to get access to the elite group.';
     await ctx.reply(
       text,
       link
@@ -101,7 +101,7 @@ export class TelegramUpdate {
   async help(@Ctx() ctx: Context) {
     const link = this.getAffiliateLink();
     const text =
-      'Need help? Send your Bybit UID to check if you qualify for the VIP group. Your account must be under our affiliate link with net assets of at least $100.' +
+      'Need help? Send your Bybit UID to check if you qualify for the Elite group. Your account must be under our affiliate link with net assets of at least $100.' +
       (link ? `\n\nReferral link: ${link}` : '');
     await ctx.reply(text);
   }
@@ -150,7 +150,7 @@ export class TelegramUpdate {
 
       case 'INSUFFICIENT_FUNDS':
         await ctx.reply(
-          `You don't meet the requirements to join the group.\n\n` +
+          `You do not meet the requirements to join the group.\n\n` +
             `Your account must have net assets of at least $100.00 to use the BOT for joining.`,
         );
         return;
@@ -158,16 +158,16 @@ export class TelegramUpdate {
       case 'APPROVED':
         if (result.alreadyVerified) {
           await ctx.reply(
-            "You're already verified. Use the VIP link we sent you earlier.",
+            'This UID is being used by another user, please send a different one!',
           );
           return;
         }
         await ctx.reply(
-          `Congratulations! You meet the requirements to join the group.\n\nClick on the button below to join the VIP group.`,
+          `Congratulations! You meet the requirements to join the group.\n\nClick on the button below to join the Elite group.`,
           Markup.inlineKeyboard([
             [
               Markup.button.url(
-                'Join VIP Group',
+                'Join Elite Group',
                 this.config.get<string>('VIP_GROUP_LINK') ?? '',
               ),
             ],

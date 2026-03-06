@@ -5,7 +5,7 @@ import type { Telegraf } from 'telegraf';
 import { PendingUidRequestService } from '../storage/pending-uid-request.service';
 
 const REMINDER_MESSAGE =
-  "You haven't submitted your Bybit UID yet. Send your UID here to check if you qualify for the VIP group (account must have net assets of at least $100).";
+  "You haven't submitted your Bybit UID yet. Send your UID here to check if you qualify for the Elite group (account must have net assets of at least $100).";
 
 @Injectable()
 export class TelegramReminderService {
