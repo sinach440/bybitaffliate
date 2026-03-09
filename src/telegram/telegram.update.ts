@@ -11,7 +11,7 @@ import { ConfigService } from '@nestjs/config';
 import { Markup } from 'telegraf';
 import type { Context } from 'telegraf';
 import { VerificationService } from '../verification/verification.service';
-import { PendingUidRequestService } from '../storage/pending-uid-request.service';
+import { UserStepService } from '../storage/user-step.service';
 import { VerifiedUserService } from '../storage/verified-user.service';
 
 const ACTION_ALREADY_BYBIT = 'already_bybit_user';
@@ -23,7 +23,7 @@ export class TelegramUpdate {
     private readonly config: ConfigService,
     private readonly verification: VerificationService,
     private readonly verifiedUser: VerifiedUserService,
-    private readonly pendingUid: PendingUidRequestService,
+    private readonly userStep: UserStepService,
   ) {}
 
   private getAffiliateLink(): string {
@@ -33,6 +33,9 @@ export class TelegramUpdate {
   @Start()
   async start(@Ctx() ctx: Context) {
     try {
+      const telegramId = ctx.from?.id;
+      if (telegramId) await this.userStep.setStep(String(telegramId), 'start');
+
       const howToJoin =
         'How to join:\n\n' +
         '1. Sign up on Bybit to start trading.\n\n' +
@@ -61,25 +64,29 @@ export class TelegramUpdate {
   async onAlreadyBybitUser(@Ctx() ctx: Context) {
     await ctx.answerCbQuery();
     const telegramId = ctx.from?.id;
-    if (telegramId) await this.pendingUid.createOrRefresh(String(telegramId));
+    if (telegramId) await this.userStep.setStep(String(telegramId), 'awaiting_uid');
     await ctx.reply('Please input your Bybit UID.');
   }
 
   @Action(ACTION_SIGN_UP_BONUS)
   async onSignUpBonus(@Ctx() ctx: Context) {
     await ctx.answerCbQuery();
+    const telegramId = ctx.from?.id;
+    if (telegramId) await this.userStep.setStep(String(telegramId), 'after_signup');
     await this.sendSignUpBonus(ctx);
   }
 
   @Command('signup')
   async onSignUpCommand(@Ctx() ctx: Context) {
+    const telegramId = ctx.from?.id;
+    if (telegramId) await this.userStep.setStep(String(telegramId), 'after_signup');
     await this.sendSignUpBonus(ctx);
   }
 
   @Command('bybituser')
   async onBybitUserCommand(@Ctx() ctx: Context) {
     const telegramId = ctx.from?.id;
-    if (telegramId) await this.pendingUid.createOrRefresh(String(telegramId));
+    if (telegramId) await this.userStep.setStep(String(telegramId), 'awaiting_uid');
     await ctx.reply('Please input your Bybit UID.');
   }
 
@@ -123,9 +130,6 @@ export class TelegramUpdate {
       return;
     }
 
-    // User is submitting a UID — clear any pending 24h reminder
-    await this.pendingUid.clear(String(ctx.from?.id ?? ''));
-
     let result;
     try {
       result = await this.verification.verify(uid);
@@ -139,6 +143,8 @@ export class TelegramUpdate {
 
     switch (result.status) {
       case 'NOT_REGISTERED': {
+        const telegramId = ctx.from?.id;
+        if (telegramId) await this.userStep.setStep(String(telegramId), 'not_registered');
         const link = this.getAffiliateLink();
         await ctx.reply(
           `The UID you sent is not associated with me.\n` +
@@ -148,12 +154,15 @@ export class TelegramUpdate {
         return;
       }
 
-      case 'INSUFFICIENT_FUNDS':
+      case 'INSUFFICIENT_FUNDS': {
+        const telegramId = ctx.from?.id;
+        if (telegramId) await this.userStep.setStep(String(telegramId), 'insufficient_funds');
         await ctx.reply(
           `You do not meet the requirements to join the group.\n\n` +
             `Your account must have net assets of at least $100.00 to use the BOT for joining.`,
         );
         return;
+      }
 
       case 'APPROVED':
         if (result.alreadyVerified) {
@@ -162,6 +171,8 @@ export class TelegramUpdate {
           );
           return;
         }
+        const telegramIdApproved = ctx.from?.id;
+        if (telegramIdApproved) await this.userStep.setStep(String(telegramIdApproved), 'verified');
         await ctx.reply(
           `Congratulations! You meet the requirements to join the group.\n\nClick on the button below to join the Elite group.`,
           Markup.inlineKeyboard([

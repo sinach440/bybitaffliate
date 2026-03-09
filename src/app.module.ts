@@ -5,6 +5,7 @@ import { ScheduleModule } from '@nestjs/schedule';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { TelegramModule } from './telegram/telegram.module';
 import { PendingUidRequest } from './storage/entities/pending-uid-request.entity';
+import { UserStep } from './storage/entities/user-step.entity';
 import { VerifiedUser } from './storage/entities/verified-user.entity';
 
 @Module({
@@ -18,7 +19,7 @@ import { VerifiedUser } from './storage/entities/verified-user.entity';
       type: 'sqljs',
       location: path.join(process.cwd(), 'data', 'verified.sqlite'),
       autoSave: true,
-      entities: [VerifiedUser, PendingUidRequest],
+      entities: [VerifiedUser, PendingUidRequest, UserStep],
       synchronize: true,
     }),
     TelegramModule,
