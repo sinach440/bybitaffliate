@@ -32,14 +32,17 @@ export class UserStepService {
     return this.repo.save(row);
   }
 
-  /** Users at a non-verified step for 24h+ who haven't been reminded yet. */
+  /** Users at a non-verified step who are due for a reminder: first time 24h after step, then every 24h until they complete. */
   async findDueForReminder(): Promise<UserStep[]> {
     const cutoff = new Date(Date.now() - REMINDER_AFTER_MS);
     return this.repo
       .createQueryBuilder('u')
       .where('u.step != :verified', { verified: 'verified' })
       .andWhere('u.step_updated_at <= :cutoff', { cutoff })
-      .andWhere('u.reminder_sent_at IS NULL')
+      .andWhere(
+        '(u.reminder_sent_at IS NULL OR u.reminder_sent_at <= :cutoff)',
+        { cutoff },
+      )
       .orderBy('u.step_updated_at', 'ASC')
       .getMany();
   }
