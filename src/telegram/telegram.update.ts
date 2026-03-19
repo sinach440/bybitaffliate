@@ -36,15 +36,21 @@ export class TelegramUpdate {
       const telegramId = ctx.from?.id;
       if (telegramId) await this.userStep.setStep(String(telegramId), 'start');
 
-      const howToJoin =
-        'How to join:\n\n' +
-        '1. Sign up on Bybit to start trading.\n\n' +
-        '2. Deposit $100 into your Bybit account.\n\n' +
-        '3. Enter your unique Bybit UID.\n\n' +
-        '4. Receive an invite link to join the Elite group.';
+      const welcomeMessage =
+        '🚀 Claim Your VIP Access + Exclusive Rewards\n\n' +
+        'Get access to:\n' +
+        '💰 Free trading bonuses\n' +
+        '📈 VIP trading signals & insights\n' +
+        '🎁 Giveaways (cash, iPhone, cars & more)\n\n\n' +
+        '⚡ Takes less than 2 minutes:\n\n' +
+        '1. Sign up on Bybit\n' +
+        '2. Deposit just $100\n' +
+        '3. Submit your UID\n' +
+        '4. Get instant VIP access\n\n' +
+        '🔥 Limited slots available — Join Now';
 
       await ctx.reply(
-        howToJoin,
+        welcomeMessage,
         Markup.inlineKeyboard([
           [Markup.button.callback('Already A Bybit User', ACTION_ALREADY_BYBIT)],
           [Markup.button.callback('Sign Up & Get Bonus', ACTION_SIGN_UP_BONUS)],
