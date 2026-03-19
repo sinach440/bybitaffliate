@@ -101,7 +101,7 @@ export class TelegramUpdate {
     const text =
       'Sign up with my affiliate link to claim up to $5000 bonuses:\n\n' +
       (link ? `${link}\n\n` : '') +
-      'Make sure you have up to $100 on your Bybit account after signing up to get access to the elite group.';
+      'Make sure you have up to $100 on your Bybit account after signing up to get access to the VIP group.';
     await ctx.reply(
       text,
       link
@@ -114,7 +114,7 @@ export class TelegramUpdate {
   async help(@Ctx() ctx: Context) {
     const link = this.getAffiliateLink();
     const text =
-      'Need help? Send your Bybit UID to check if you qualify for the Elite group. Your account must be under our affiliate link with net assets of at least $100.' +
+      'Need help? Send your Bybit UID to check if you qualify for the VIP group. Your account must be under our affiliate link with net assets of at least $100.' +
       (link ? `\n\nReferral link: ${link}` : '');
     await ctx.reply(text);
   }
@@ -180,11 +180,11 @@ export class TelegramUpdate {
         const telegramIdApproved = ctx.from?.id;
         if (telegramIdApproved) await this.userStep.setStep(String(telegramIdApproved), 'verified');
         await ctx.reply(
-          `Congratulations! You meet the requirements to join the group.\n\nClick on the button below to join the Elite group.`,
+          `Congratulations! You meet the requirements to join the group.\n\nClick on the button below to join the VIP group.`,
           Markup.inlineKeyboard([
             [
               Markup.button.url(
-                'Join Elite Group',
+                'Join VIP Group',
                 this.config.get<string>('VIP_GROUP_LINK') ?? '',
               ),
             ],

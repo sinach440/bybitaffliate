@@ -22,9 +22,9 @@ export class TelegramReminderService {
           "You have not chosen an option yet. Tap 'Already A Bybit User' to submit your UID, or 'Sign Up & Get Bonus' to get the referral link."
         );
       case 'awaiting_uid':
-        return "You have not submitted your Bybit UID yet. Send your UID here to check if you qualify for the Elite group (account must have net assets of at least $100).";
+        return "You have not submitted your Bybit UID yet. Send your UID here to check if you qualify for the VIP group (account must have net assets of at least $100).";
       case 'after_signup':
-        return "You got the sign-up link. After signing up, send your Bybit UID here to get access to the Elite group (account must have at least $100).";
+        return "You got the sign-up link. After signing up, send your Bybit UID here to get access to the VIP group (account must have at least $100).";
       case 'not_registered':
         return (
           "Your UID was not under our affiliate. Please sign up with our referral link first, then send your UID here again." +
@@ -33,7 +33,7 @@ export class TelegramReminderService {
       case 'insufficient_funds':
         return "Your account needs at least $100 to qualify. Top up and send your UID again when ready.";
       default:
-        return "Continue your sign-up: send your Bybit UID here to check if you qualify for the Elite group (account must have at least $100).";
+        return "Continue your sign-up: send your Bybit UID here to check if you qualify for the VIP group (account must have at least $100).";
     }
   }
 

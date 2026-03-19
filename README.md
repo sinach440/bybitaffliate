@@ -1,6 +1,6 @@
 # Bybit Affiliate Telegram Bot
 
-A Telegram bot that verifies users by Bybit UID (affiliate + balance) and sends a one-time Elite group invite. Built with NestJS, Telegraf, and TypeORM (sql.js).
+A Telegram bot that verifies users by Bybit UID (affiliate + balance) and sends a one-time VIP group invite. Built with NestJS, Telegraf, and TypeORM (sql.js).
 
 ---
 
@@ -8,7 +8,7 @@ A Telegram bot that verifies users by Bybit UID (affiliate + balance) and sends 
 
 - **Start flow:** Users see “How to join” and can choose “Already A Bybit User” or “Sign Up & Get Bonus”.
 - **UID check:** Users send their Bybit UID; the bot checks via Bybit API that the account is under your affiliate and has at least $100.
-- **Elite group link:** On success, the bot sends the Elite group link once. If the UID was already used by another Telegram user, it asks for a different UID.
+- **VIP group link:** On success, the bot sends the VIP group link once. If the UID was already used by another Telegram user, it asks for a different UID.
 - **Reminders:** If a user stops at any step (e.g. didn’t choose an option, didn’t send UID, or failed verification), the bot sends a step-specific reminder after 24 hours.
 
 ---
@@ -53,7 +53,7 @@ Edit `.env`:
 | `BYBIT_SECRET` | Bybit API secret |
 | `BYBIT_BASE_URL` | `https://api.bybit.com` (or testnet if needed) |
 | `AFFILIATE_LINK` | Your Bybit referral/affiliate link |
-| `VIP_GROUP_LINK` | Telegram invite link for the Elite group |
+| `VIP_GROUP_LINK` | Telegram invite link for the VIP group |
 
 ### 3. Data directory
 
@@ -97,7 +97,7 @@ Telegram will send updates to `https://<SERVER_URL><WEBHOOK_PATH>` (e.g. `https:
    - Checks with Bybit that the UID is under your affiliate and has ≥ $100.
    - If **not registered** under your affiliate → asks them to sign up with your link.
    - If **insufficient funds** → asks them to top up to at least $100.
-   - If **approved** → sends the Elite group link once. If that UID was already used by someone else → asks for a different UID.
+   - If **approved** → sends the VIP group link once. If that UID was already used by someone else → asks for a different UID.
 5. **Reminders:** If the user doesn’t complete the next step within 24 hours, the bot sends a “Reminder” message (with a bell) tailored to the step they stopped at (e.g. “choose an option”, “send your UID”, “sign up with our link”, “top up to $100”).
 
 ---
@@ -117,7 +117,7 @@ Telegram will send updates to `https://<SERVER_URL><WEBHOOK_PATH>` (e.g. `https:
 - `src/app.module.ts` — Config, TypeORM (sql.js), Schedule, Telegram module.
 - `src/telegram/` — Bot handlers (`telegram.update.ts`), webhook controller, step-based reminder cron.
 - `src/verification/` — Bybit UID verification (affiliate + balance).
-- `src/storage/` — Verified users (one-time Elite link), user steps (for reminders), pending UID requests (legacy).
+- `src/storage/` — Verified users (one-time VIP link), user steps (for reminders), pending UID requests (legacy).
 - `src/bybit/` — Bybit API client (HMAC-signed requests).
 
 ---
