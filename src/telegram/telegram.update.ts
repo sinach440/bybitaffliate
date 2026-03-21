@@ -41,7 +41,7 @@ export class TelegramUpdate {
         'Get access to:\n' +
         '💰 Free trading bonuses\n' +
         '📈 VIP trading signals & insights\n' +
-        '🎁 Giveaways (cash, iPhone, cars & more)\n\n\n' +
+        '🎁 Giveaways (cash, iPhone and more)\n\n\n' +
         '⚡ Takes less than 2 minutes:\n\n' +
         '1. Sign up on Bybit\n' +
         '2. Deposit just $100\n' +
