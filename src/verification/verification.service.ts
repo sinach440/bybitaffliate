@@ -13,10 +13,13 @@ export interface VerificationResult {
   alreadyVerified?: boolean;
 }
 
+/** Minimum deposit (USDT) required to join the Elite group. */
+export const MIN_DEPOSIT_USDT = 10;
+
 /**
- * Eligibility uses Bybit totalWalletBalance tier:
- * "1" = <100 USDT, "2" = [100, 250), "3" = [250, 500), "4" = >= 500.
- * We require tier >= 2 (i.e. at least 100 USDT wallet balance).
+ * Eligibility uses Bybit deposit totals (depositAmount30Day / depositAmount365Day).
+ * Wallet balance is only a tier ("1" = <100 USDT), so it cannot confirm a $10 deposit.
+ * A tier of 2+ still qualifies, because that account already holds at least 100 USDT.
  */
 @Injectable()
 export class VerificationService {
@@ -38,7 +41,7 @@ export class VerificationService {
       return { status: 'NOT_REGISTERED' };
     }
 
-    if (!this.bybit.hasMinWalletBalance(info, 2)) {
+    if (!this.bybit.hasMinDeposit(info, MIN_DEPOSIT_USDT)) {
       return { status: 'INSUFFICIENT_FUNDS' };
     }
 

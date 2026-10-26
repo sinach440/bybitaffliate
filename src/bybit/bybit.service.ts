@@ -88,12 +88,23 @@ export class BybitService {
   /**
    * totalWalletBalance: "1"=<100 USDT, "2"=[100,250), "3"=[250,500), "4"=>=500.
    * Returns true if wallet balance tier is >= 100 USDT (i.e. "2", "3", or "4").
+   * This tier cannot see balances under 100 USDT.
    */
   hasMinWalletBalance(info: BybitAffCustomerInfo, minTier: number = 2): boolean {
     const tier = info.totalWalletBalance;
     if (!tier) return false;
     const n = parseInt(tier, 10);
     return n >= minTier; // 2 = [100, 250), 3 = [250, 500), 4 = >= 500
+  }
+
+  /**
+   * True when recent deposits reach minUsdt, or the wallet tier is already >= 100 USDT.
+   * Deposit fields are USDT totals (30-day and 365-day). The wallet tier only buckets
+   * under/over 100, so amounts between minUsdt and 100 are decided by deposits.
+   */
+  hasMinDeposit(info: BybitAffCustomerInfo, minUsdt: number): boolean {
+    if (this.getUserDepositAmount(info) >= minUsdt) return true;
+    return this.hasMinWalletBalance(info, 2);
   }
 
   /**
@@ -129,11 +140,14 @@ export class BybitService {
     }
   }
 
-  getUserDepositAmount(user: BybitAffUserListItem): number {
-    const d365 = user.depositAmount365Day;
-    const d30 = user.depositAmount30Day;
-    const v365 = d365 ? parseFloat(d365) : 0;
-    const v30 = d30 ? parseFloat(d30) : 0;
-    return Math.max(v365, v30);
+  getUserDepositAmount(user: {
+    depositAmount365Day?: string;
+    depositAmount30Day?: string;
+  }): number {
+    const amounts = [user.depositAmount365Day, user.depositAmount30Day].map((value) => {
+      const n = value ? parseFloat(value) : 0;
+      return Number.isFinite(n) ? n : 0;
+    });
+    return Math.max(amounts[0], amounts[1]);
   }
 }
