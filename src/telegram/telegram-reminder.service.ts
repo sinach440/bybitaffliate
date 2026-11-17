@@ -3,7 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import { Cron } from '@nestjs/schedule';
 import { getBotToken } from 'nestjs-telegraf';
 import type { Telegraf } from 'telegraf';
-import { MIN_DEPOSIT_USDT } from '../verification/verification.service';
+import { BotSettingsService } from '../settings/bot-settings.service';
 import { UserStepService } from '../storage/user-step.service';
 import type { Step } from '../storage/entities/user-step.entity';
 
@@ -13,9 +13,11 @@ export class TelegramReminderService {
     @Inject(getBotToken()) private readonly bot: Telegraf,
     private readonly config: ConfigService,
     private readonly userStep: UserStepService,
+    private readonly settings: BotSettingsService,
   ) {}
 
   private getMessageForStep(step: Step): string {
+    const req = this.settings.requirementsText;
     const affiliateLink = this.config.get<string>('AFFILIATE_LINK')?.trim() ?? '';
     switch (step) {
       case 'start':
@@ -23,18 +25,18 @@ export class TelegramReminderService {
           "You have not chosen an option yet. Tap 'Already A Bybit User' to submit your UID, or 'Sign Up & Get Bonus' to get the referral link."
         );
       case 'awaiting_uid':
-        return `You have not submitted your Bybit UID yet. Send your UID here to check if you qualify for the Elite group (account must have a deposit of at least $${MIN_DEPOSIT_USDT}).`;
+        return `You have not submitted your Bybit UID yet. Send your UID here to check if you qualify for the Elite group (account must have ${req}).`;
       case 'after_signup':
-        return `You got the sign-up link. After signing up, send your Bybit UID here to get access to the Elite group (account must have a deposit of at least $${MIN_DEPOSIT_USDT}).`;
+        return `You got the sign-up link. After signing up, send your Bybit UID here to get access to the Elite group (account must have ${req}).`;
       case 'not_registered':
         return (
           "Your UID was not under our affiliate. Please sign up with our referral link first, then send your UID here again." +
           (affiliateLink ? `\n\n${affiliateLink}` : '')
         );
       case 'insufficient_funds':
-        return `Your account needs a deposit of at least $${MIN_DEPOSIT_USDT} to qualify. Top up and send your UID again when ready.`;
+        return `Your account needs ${req} to qualify. Top up and send your UID again when ready.`;
       default:
-        return `Continue your sign-up: send your Bybit UID here to check if you qualify for the Elite group (account must have a deposit of at least $${MIN_DEPOSIT_USDT}).`;
+        return `Continue your sign-up: send your Bybit UID here to check if you qualify for the Elite group (account must have ${req}).`;
     }
   }
 

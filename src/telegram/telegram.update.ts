@@ -10,10 +10,8 @@ import {
 import { ConfigService } from '@nestjs/config';
 import { Markup } from 'telegraf';
 import type { Context } from 'telegraf';
-import {
-  MIN_DEPOSIT_USDT,
-  VerificationService,
-} from '../verification/verification.service';
+import { VerificationService } from '../verification/verification.service';
+import { BotSettingsService } from '../settings/bot-settings.service';
 import { UserStepService } from '../storage/user-step.service';
 import { VerifiedUserService } from '../storage/verified-user.service';
 
@@ -27,6 +25,7 @@ export class TelegramUpdate {
     private readonly verification: VerificationService,
     private readonly verifiedUser: VerifiedUserService,
     private readonly userStep: UserStepService,
+    private readonly settings: BotSettingsService,
   ) {}
 
   private getAffiliateLink(): string {
@@ -39,12 +38,18 @@ export class TelegramUpdate {
       const telegramId = ctx.from?.id;
       if (telegramId) await this.userStep.setStep(String(telegramId), 'start');
 
+      const { minDepositUsdt, minTradeVolumeUsdt, giveawayPrizesText } = this.settings;
+      const steps = [
+        'Sign up on Bybit to start trading.',
+        `Deposit $${minDepositUsdt} into your Bybit account.`,
+        ...(minTradeVolumeUsdt > 0 ? [`Trade at least $${minTradeVolumeUsdt} in volume.`] : []),
+        'Enter your unique Bybit UID.',
+        'Receive an invite link to join the Elite group.',
+      ];
       const howToJoin =
+        (giveawayPrizesText ? `🎁 Giveaways (${giveawayPrizesText})\n\n` : '') +
         'How to join:\n\n' +
-        '1. Sign up on Bybit to start trading.\n\n' +
-        `2. Deposit $${MIN_DEPOSIT_USDT} into your Bybit account.\n\n` +
-        '3. Enter your unique Bybit UID.\n\n' +
-        '4. Receive an invite link to join the Elite group.';
+        steps.map((s, i) => `${i + 1}. ${s}`).join('\n\n');
 
       await ctx.reply(
         howToJoin,
@@ -98,7 +103,7 @@ export class TelegramUpdate {
     const text =
       'Sign up with my affiliate link to claim up to $5000 bonuses:\n\n' +
       (link ? `${link}\n\n` : '') +
-      `Make sure you deposit at least $${MIN_DEPOSIT_USDT} on your Bybit account after signing up to get access to the elite group.`;
+      `Make sure your Bybit account has ${this.settings.requirementsText} after signing up to get access to the elite group.`;
     await ctx.reply(
       text,
       link
@@ -111,7 +116,7 @@ export class TelegramUpdate {
   async help(@Ctx() ctx: Context) {
     const link = this.getAffiliateLink();
     const text =
-      `Need help? Send your Bybit UID to check if you qualify for the Elite group. Your account must be under our affiliate link with a deposit of at least $${MIN_DEPOSIT_USDT}.` +
+      `Need help? Send your Bybit UID to check if you qualify for the Elite group. Your account must be under our affiliate link with ${this.settings.requirementsText}.` +
       (link ? `\n\nReferral link: ${link}` : '');
     await ctx.reply(text);
   }
@@ -152,7 +157,7 @@ export class TelegramUpdate {
         await ctx.reply(
           `The UID you sent is not associated with me.\n` +
             (link ? `Please register using my referral link:\n\n${link}\n\n` : 'Please register using our referral link.\n\n') +
-            `The account must have a deposit of at least $${MIN_DEPOSIT_USDT.toFixed(2)} before you can use the BOT to join the group.`,
+            `The account must have ${this.settings.requirementsText} before you can use the BOT to join the group.`,
         );
         return;
       }
@@ -162,7 +167,7 @@ export class TelegramUpdate {
         if (telegramId) await this.userStep.setStep(String(telegramId), 'insufficient_funds');
         await ctx.reply(
           `You do not meet the requirements to join the group.\n\n` +
-            `Your account must have a deposit of at least $${MIN_DEPOSIT_USDT.toFixed(2)} to use the BOT for joining.`,
+            `Your account must have ${this.settings.requirementsText} to use the BOT for joining.`,
         );
         return;
       }

@@ -104,7 +104,19 @@ export class BybitService {
    */
   hasMinDeposit(info: BybitAffCustomerInfo, minUsdt: number): boolean {
     if (this.getUserDepositAmount(info) >= minUsdt) return true;
-    return this.hasMinWalletBalance(info, 2);
+    // Wallet tier lower bounds: 2 = 100, 3 = 250, 4 = 500. Use the lowest tier that covers minUsdt.
+    const tier = minUsdt <= 100 ? 2 : minUsdt <= 250 ? 3 : minUsdt <= 500 ? 4 : null;
+    return tier != null && this.hasMinWalletBalance(info, tier);
+  }
+
+  /** True when 30-day or 365-day trading volume reaches minUsdt (always true when minUsdt <= 0). */
+  hasMinTradeVolume(info: BybitAffCustomerInfo, minUsdt: number): boolean {
+    if (minUsdt <= 0) return true;
+    const vols = [info.tradeVol30Day, info.tradeVol365Day].map((v) => {
+      const n = v ? parseFloat(v) : 0;
+      return Number.isFinite(n) ? n : 0;
+    });
+    return Math.max(...vols) >= minUsdt;
   }
 
   /**

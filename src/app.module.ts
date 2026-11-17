@@ -4,6 +4,7 @@ import { ConfigModule } from '@nestjs/config';
 import { ScheduleModule } from '@nestjs/schedule';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { TelegramModule } from './telegram/telegram.module';
+import { SettingsModule } from './settings/settings.module';
 import { PendingUidRequest } from './storage/entities/pending-uid-request.entity';
 import { UserStep } from './storage/entities/user-step.entity';
 import { VerifiedUser } from './storage/entities/verified-user.entity';
@@ -14,6 +15,7 @@ import { VerifiedUser } from './storage/entities/verified-user.entity';
       isGlobal: true,
       envFilePath: '.env',
     }),
+    SettingsModule,
     ScheduleModule.forRoot(),
     TypeOrmModule.forRoot({
       type: 'sqljs',

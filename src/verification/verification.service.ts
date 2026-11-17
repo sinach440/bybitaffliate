@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { BybitService } from '../bybit/bybit.service';
 import { VerifiedUserService } from '../storage/verified-user.service';
+import { BotSettingsService } from '../settings/bot-settings.service';
 
 export type VerificationStatus =
   | 'NOT_REGISTERED'
@@ -13,19 +14,17 @@ export interface VerificationResult {
   alreadyVerified?: boolean;
 }
 
-/** Minimum deposit (USDT) required to join the Elite group. */
-export const MIN_DEPOSIT_USDT = 10;
-
 /**
  * Eligibility uses Bybit deposit totals (depositAmount30Day / depositAmount365Day).
- * Wallet balance is only a tier ("1" = <100 USDT), so it cannot confirm a $10 deposit.
- * A tier of 2+ still qualifies, because that account already holds at least 100 USDT.
+ * Wallet balance is only a tier, so it is a fallback for deposits of 100+ USDT.
+ * Thresholds come from BotSettingsService (MIN_DEPOSIT_USDT, MIN_TRADE_VOLUME_USDT).
  */
 @Injectable()
 export class VerificationService {
   constructor(
     private bybit: BybitService,
     private verifiedUser: VerifiedUserService,
+    private settings: BotSettingsService,
   ) {}
 
   async verify(uid: string): Promise<VerificationResult> {
@@ -41,7 +40,10 @@ export class VerificationService {
       return { status: 'NOT_REGISTERED' };
     }
 
-    if (!this.bybit.hasMinDeposit(info, MIN_DEPOSIT_USDT)) {
+    if (
+      !this.bybit.hasMinDeposit(info, this.settings.minDepositUsdt) ||
+      !this.bybit.hasMinTradeVolume(info, this.settings.minTradeVolumeUsdt)
+    ) {
       return { status: 'INSUFFICIENT_FUNDS' };
     }
 
