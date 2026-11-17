@@ -34,10 +34,9 @@ export class BotSettingsService {
       .filter(Boolean);
   }
 
-  /** e.g. "cash, iPhone and more" */
+  /** Shown exactly as written, e.g. "$300 and a surprise gift" or "cash, iPhone" */
   get giveawayPrizesText(): string {
-    const prizes = this.giveawayPrizes;
-    return prizes.length ? `${prizes.join(', ')} and more` : '';
+    return this.giveawayPrizes.join(', ');
   }
 
   /** e.g. "a deposit of at least $10" or "a deposit of at least $10 and trading volume of at least $500" */
