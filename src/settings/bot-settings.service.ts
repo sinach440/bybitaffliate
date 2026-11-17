@@ -7,6 +7,7 @@ import { ConfigService } from '@nestjs/config';
  *   MIN_DEPOSIT_USDT=10            minimum deposit (30d or 365d total) to qualify
  *   MIN_TRADE_VOLUME_USDT=0        minimum trading volume (30d or 365d); 0 = not required
  *   GIVEAWAY_PRIZES=cash,iPhone    comma-separated prizes shown in the welcome message; empty = hidden
+ *   REWARDS=a|b                    reward lines shown in /start, separated by "|"; overrides GIVEAWAY_PRIZES
  */
 @Injectable()
 export class BotSettingsService {
@@ -32,6 +33,26 @@ export class BotSettingsService {
       .split(',')
       .map((p) => p.trim())
       .filter(Boolean);
+  }
+
+  /** REWARDS from .env, one reward per line, separated by "|". */
+  get rewardLines(): string[] {
+    return (this.config.get<string>('REWARDS') ?? '')
+      .split('|')
+      .map((line) => line.trim())
+      .filter(Boolean);
+  }
+
+  /** "🎁 Rewards:\n• ...\n\n", else the old GIVEAWAY_PRIZES line, or "" when REWARDS is empty. */
+  get rewardsBlock(): string {
+    const lines = this.rewardLines;
+    if (!lines.length) return this.giveawayPrizesText ? `🎁 Giveaways (${this.giveawayPrizesText})\n\n` : '';
+    return lines.length ? `🎁 Rewards:\n${lines.map((l) => `• ${l}`).join('\n')}\n\n` : '';
+  }
+
+  /** "ANY amount" when the minimum deposit is $1 or less, else e.g. "$10". */
+  get depositAmountText(): string {
+    return this.minDepositUsdt <= 1 ? 'ANY amount' : `$${this.minDepositUsdt}`;
   }
 
   /** Shown exactly as written, e.g. "$300 and a surprise gift" or "cash, iPhone" */

@@ -38,16 +38,17 @@ export class TelegramUpdate {
       const telegramId = ctx.from?.id;
       if (telegramId) await this.userStep.setStep(String(telegramId), 'start');
 
-      const { minDepositUsdt, minTradeVolumeUsdt, giveawayPrizesText } = this.settings;
+      const { depositAmountText, minTradeVolumeUsdt, rewardsBlock } = this.settings;
+      const link = this.getAffiliateLink();
       const steps = [
-        'Sign up on Bybit to start trading.',
-        `Deposit $${minDepositUsdt} into your Bybit account.`,
-        ...(minTradeVolumeUsdt > 0 ? [`Trade at least $${minTradeVolumeUsdt} in volume.`] : []),
+        'Sign up on Bybit to start trading' + (link ? ` using my referral link: ${link}` : '.'),
+        `Deposit ${depositAmountText} into your Bybit account and ` +
+          (minTradeVolumeUsdt > 1 ? `trade at least $${minTradeVolumeUsdt} in volume.` : 'complete a trade.'),
         'Enter your unique Bybit UID.',
         'Receive an invite link to join the Elite group.',
       ];
       const howToJoin =
-        (giveawayPrizesText ? `🎁 Giveaways (${giveawayPrizesText})\n\n` : '') +
+        rewardsBlock +
         'How to join:\n\n' +
         steps.map((s, i) => `${i + 1}. ${s}`).join('\n\n');
 
