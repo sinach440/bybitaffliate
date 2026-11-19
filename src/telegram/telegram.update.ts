@@ -102,9 +102,9 @@ export class TelegramUpdate {
   private async sendSignUpBonus(ctx: Context) {
     const link = this.getAffiliateLink();
     const text =
-      'Sign up with my affiliate link to claim up to $5000 bonuses:\n\n' +
+      'Sign up with my affiliate link to claim up to $100 rewards:\n\n' +
       (link ? `${link}\n\n` : '') +
-      `Make sure your Bybit account has ${this.settings.requirementsText} after signing up to get access to the elite group.`;
+      'Make sure your Bybit account has made at least one deposit and also completed ANY trade after signing up to get access to the elite group.';
     await ctx.reply(
       text,
       link
